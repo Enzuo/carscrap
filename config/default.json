@@ -1,0 +1,10 @@
+{
+	"database" : {
+		"name" : "carscrap"
+	},
+	"folders" : {
+		"download" : "data",
+		"images" : "images",
+		"pages" : "pages"
+	}
+}

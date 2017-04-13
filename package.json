@@ -1,0 +1,21 @@
+{
+  "name": "carscrap",
+  "version": "1.0.0",
+  "description": "Car infos scrapping",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "DEBUG=* node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "config": "^1.25.1",
+    "debug": "^2.6.3",
+    "fs-promise": "^2.0.2",
+    "hasha": "^2.2.0",
+    "moment": "^2.18.1",
+    "request": "^2.81.0"
+  }
+}
