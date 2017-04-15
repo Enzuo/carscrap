@@ -13,21 +13,23 @@ const carModelList = [
 ]
 
 const engines = [
-	['1.2 75',       ['1.2','75'],  '75', 'clim'],
-	['1.2 84',       ['1.2','84'],  '1.2', 'ea', 'uefa'],
+	['1.4 crdi 90',  ['1.4','90'],  ['1.4', 'crdi'], '90'],
+	['1.1 crdi 75',  ['1.1','75'],  ['1.1', 'crdi'], 'crdi'],
+	['1.2 75',       ['1.2','75'],  '75',            'clim'],
+	['1.2 84',       ['1.2','84'],  '1.2',           'ea',     'uefa'],
 	['1.4 100',      ['1.4','100'], '1.4'],
 	['1.4 120',      ['1.4','120']],
-	['1.0 tgdi 100', ['1.0','100'], '1.0', 'active', 't-gdi', 'tgdi'],
+	['1.0 tgdi 100', ['1.0','100'], '1.0',           'active', 't-gdi', 'tgdi'],
 	['1.0 tgdi 120', ['1.0','120']],
 ]
 
 const finitions = [
-	['initia',         'initia',         'clim'],
-	['intuitive',      'intuitive',      'uefa', 'ea'       , 'sports'],
-	['intuitive plus', 'intuitive plus', 'plus', 'edition#1', ['edition','84']],
+	['initia',         'initia',             'clim'],
+	['intuitive plus', ['intuitive','plus'], 'plus', 'edition#1', ['edition','84'], 'navi'],
+	['intuitive',      'intuitive',          'uefa', 'ea'       , 'sports',         'go'],
 	['creative',       'creative' ],
 	['active',         'active' ],
-	['pop pack',       'pop',            'pack', 'blackline' ],
+	['pop pack',       'pop',                'pack', 'blackline' ],
 ]
 
 function extractModel(title, matchTable){
