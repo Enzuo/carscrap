@@ -5,14 +5,14 @@ const engines = [
 	['1.2 84',       ['1.2','84'],  '1.2',           'ea',     'uefa'],
 	['1.4 100',      ['1.4','100'], '1.4'],
 	['1.4 120',      ['1.4','120']],
-	['1.0 tgdi 100', ['1.0','100'], '1.0',           'active', 't-gdi', 'tgdi'],
+	['1.0 tgdi 100', ['1.0','100'], '1.0',           'active', 't-gdi', 'tgdi', '1l'],
 	['1.0 tgdi 120', ['1.0','120']],
 ]
 
 const finitions = [
 	['initia',         'initia',             'clim'],
-	['intuitive plus', ['intuitive','plus'], 'plus', 'edition#1', ['edition','84'], 'navi'],
-	['intuitive',      'intuitive',          'uefa', 'ea'       , 'sports',         'go'],
+	['intuitive plus', ['intuitive','plus'], 'plus', ['edition','#','1'], ['edition','84'], 'navi'],
+	['intuitive',      'intuitive',          'uefa', 'ea'               , 'sports',         'go'],
 	['creative',       'creative' ],
 	['active',         'active' ],
 	['pop pack',       'pop',                'pack', 'blackline' ],
