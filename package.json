@@ -15,7 +15,6 @@
     "config": "^1.25.1",
     "debug": "^2.6.3",
     "fs-promise": "^2.0.2",
-    "hasha": "^2.2.0",
     "moment": "^2.18.1",
     "phash": "aaronm67/node-phash",
     "request": "^2.81.0"

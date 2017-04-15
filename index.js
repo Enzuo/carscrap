@@ -1,8 +1,7 @@
 global.Promise = require('bluebird')
 var request = require('request')
 var cheerio = require('cheerio')
-var hasha = require('hasha')
-var pHash = require("phash");
+var pHash = require('phash')
 var fs = require('fs')
 var fsp = require('fs-promise')
 const path = require('path')
@@ -29,20 +28,15 @@ for(var i=0; i < urls.length; i++){
 	})
 	.catch((err) => {
 		throw err
-	});
+	})
 	carsPromises.push(p)
 }
 
 Promise.all(carsPromises).then((cars) => {
 	//http://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays-in-javascript
-	var mergedCars = [].concat.apply([], cars);
-	debug(mergedCars);
+	var mergedCars = [].concat.apply([], cars)
+	debug(mergedCars)
 })
-
-function readPage(pageName) {
-	return fsp.readFile( path.join(config.get('folders.download'), config.get('folders.pages'), pageName), 'utf-8')
-}
-
 
 /**
  * 
@@ -74,7 +68,7 @@ function downloadPage(url, pagePath) {
 						reject(err)
 					}
 					resolve(html)
-				});
+				})
 			}
 			else{
 				reject(error)
@@ -84,15 +78,13 @@ function downloadPage(url, pagePath) {
 }
 
 function processPage(html){
-	var $ = cheerio.load(html);
+	var $ = cheerio.load(html)
 
 	var ads = $('.rzc-ad')
 
-	var cars = []
 	var carsImagesPromises = []
 
 	for(var i=0; i < ads.length; i++){
-	// for(var i=0; i < 15; i++){
 		var carAd = $(ads[i])
 		var car = {}
 		car.title = carAd.find('.ad-title a').html()
@@ -123,7 +115,7 @@ function extractDate(date){
 }
 
 function addImageToData(url, data){
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		var imgName = url.replace(/\/|:/g,'_')
 
 		// Look in folder , no need to download if it's there
@@ -160,15 +152,15 @@ function addImageToData(url, data){
 }
 
 function downloadImage(url, imagePath){
-	return new Promise( (resolve, reject) => {
+	return new Promise( (resolve) => {
 		debug('download Image',url)
 
-		request.head(url, function(err, res, body){
+		request.head(url, function(){
 			// console.log('content-type:', res.headers['content-type'])
 			// console.log('content-length:', res.headers['content-length'])
 
 			request(url).pipe(fs.createWriteStream(imagePath)).on('close', () => {
-				resolve();
+				resolve()
 			})
 		})
 	})
@@ -177,11 +169,11 @@ function downloadImage(url, imagePath){
 function init(){
 	var pagesPath = path.join(config.get('folders.download'), config.get('folders.pages'))
 	if (!fs.existsSync( pagesPath )) {
-		fs.mkdirSync(pagesPath);
+		fs.mkdirSync(pagesPath)
 	}
 	var imagePath = path.join(config.get('folders.download'), config.get('folders.images'))
 	if (!fs.existsSync( imagePath )) {
-		fs.mkdirSync(imagePath);
+		fs.mkdirSync(imagePath)
 	}
 	debug('init folder structure done')
 }

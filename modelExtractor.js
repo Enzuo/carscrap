@@ -1,17 +1,3 @@
-const carModelList = [
-	'edition clim 1.2 75',
-	'edition initia 1.2 84',
-	'1.2 84 uefa',
-	'1.2 84 ea sports',
-	'edition#1 1.2',
-	'intuitive 1.2 84',
-	'intuitive plus 1.2 84',
-	'creative 1.2 84',
-	'intuitive 1.4',
-	'creative 1.4',
-	'active 1.0',
-]
-
 const engines = [
 	['1.4 crdi 90',  ['1.4','90'],  ['1.4', 'crdi'], '90'],
 	['1.1 crdi 75',  ['1.1','75'],  ['1.1', 'crdi'], 'crdi'],
@@ -34,10 +20,10 @@ const finitions = [
 
 function extractModel(title, matchTable){
 	var simpleTitle = title.toLowerCase().replace(',','.')
-	var defDepth=1;
-	var maxDefDepth = 0;
-	for(var i=0; i < matchTable.length; i++){
-		maxDefDepth = Math.max(maxDefDepth, matchTable[i].length)
+	var defDepth=1
+	var maxDefDepth = 0
+	for(var j=0; j < matchTable.length; j++){
+		maxDefDepth = Math.max(maxDefDepth, matchTable[j].length)
 	}
 	for(var i=0; defDepth < maxDefDepth; i++){
 		if(i < matchTable.length === false){
@@ -46,11 +32,11 @@ function extractModel(title, matchTable){
 		}
 		var model = matchTable[i]
 		if(defDepth >= model.length){
-			continue;
+			continue
 		}
 		var definition = model[defDepth]
 		if(Array.isArray(definition)){
-			var matchingTerms = 0;
+			var matchingTerms = 0
 			for(var k=0; k < definition.length; k++){
 				if(simpleTitle.indexOf(definition[k]) >= 0){
 					matchingTerms += 1
@@ -70,4 +56,3 @@ function extractModel(title, matchTable){
 }
 
 module.exports = {engines, finitions, extractModel}
-console.log(extractModel('kangoo 1.3 super 100', engines));
