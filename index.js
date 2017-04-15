@@ -26,8 +26,9 @@ url = 'http://www.reezocar.com/search/hyundai+i20.html?size=400&minYear=2015&max
 init()
 // downloadPage(url, 'reezocar')
 readPage('2017-04-14-reezocar.html')
-.then((html) => {
-	processPage(html);
+.then( processPage )
+.then((cars) => {
+	debug('cars', cars)
 })
 .catch((err) => {
 	throw err
@@ -66,44 +67,40 @@ function processPage(html){
 	var ads = $('.rzc-ad')
 
 	var cars = []
-	var carsImages = []
+	var carsImagesPromises = []
 
 	for(var i=0; i < ads.length; i++){
 	// for(var i=0; i < 15; i++){
-		var car = $(ads[i])
-		var title = car.find('.ad-title a').html()
-		var dateCreated = extractDate(car.find('.ad-date_create').html())
-		var imgUrl = car.find('.picture img').attr('src')
-		var year = $(car.find('.ad-details li').get(2)).children().remove().end().text()
-		var km = $(car.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g).join('')
-		var fuel = $(car.find('.ad-details li').get(4)).children().remove().end().text()
-		var gearbox = $(car.find('.ad-details li').get(5)).children().remove().end().text()
-		var location = car.find('.ad-picture li.loc').children().remove().end().text().trim()
-		var dept = location.match(/\d\d|^$/)
-		if(dept){
-			dept = dept.join('')
+		var carAd = $(ads[i])
+		var car = {}
+		car.title = carAd.find('.ad-title a').html()
+		car.dateCreated = extractDate(carAd.find('.ad-date_create').html())
+		car.imgUrl = carAd.find('.picture img').attr('src')
+		car.year = $(carAd.find('.ad-details li').get(2)).children().remove().end().text()
+		car.km = $(carAd.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g).join('')
+		car.fuel = $(carAd.find('.ad-details li').get(4)).children().remove().end().text()
+		car.gearbox = $(carAd.find('.ad-details li').get(5)).children().remove().end().text()
+		car.location = carAd.find('.ad-picture li.loc').children().remove().end().text().trim()
+		var departement = car.location.match(/\d\d|^$/)
+		if(departement){
+			departement = departement.join('')
 		}
-		var source = car.find('.ad-picture li.src a').text().trim()
-		var price = car.find('.ad-price').text().match(/\d/g).join('')
-		var model = modelExtractor.extractModel(title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(title, modelExtractor.finitions)
-		// console.log(i, title, dateCreated, imgUrl)
-		console.log(i, title, '---',model);
-		// console.log(year, km, fuel, gearbox, dept, source, price)
+		car.departement = departement
+		car.source = carAd.find('.ad-picture li.src a').text().trim()
+		car.price = carAd.find('.ad-price').text().match(/\d/g).join('')
+		car.model = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
-		// downloadImage(photos[i].attribs.src)
-		carsImages.push(getImage(imgUrl))
+		carsImagesPromises.push(addImageToData(car.imgUrl, car))
 	}
 
-	Promise.all(carsImages).then((data) =>{
-		console.log(data);
-	})
+	return Promise.all(carsImagesPromises)
 }
 
 function extractDate(date){
 	return date.match(/(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/[0-9]{4}/g).join('')
 }
 
-function getImage(url){
+function addImageToData(url, data){
 	return new Promise((resolve, reject) => {
 		console.log('start getImage')
 		var imgName = url.replace(/\/|:/g,'_')
@@ -111,32 +108,40 @@ function getImage(url){
 
 		// Look in folder , no need to download if it's there
 		var imagePath = path.join(config.get('folders.download'), config.get('folders.images'), imgName)
+		data.imgName = imgName
+		data.imgPHash = ''
 		fsp.stat(imagePath)
 		.then(() => {
 			debug('image %s exists, loading up...', imgName)
 			pHash.imageHash(imagePath, function(err, hash){
 				if(err){
 					debug(err + imgName)
-					resolve('')
+					resolve(data)
 				}
-				resolve(hash)
+				data.imgPHash = hash
+				resolve(data)
 			})
 		})
 		// Download image
 		.catch(() => {
-			downloadImage(url, imgName).catch((err) => {
-				debug('error', err)
+			downloadImage(url, imgPath).catch((err) => {
+				pHash.imageHash(imagePath, function(err, hash){
+					if(err){
+						debug(err + imgName)
+						resolve(data)
+					}
+					data.imgPHash = hash
+					resolve(data)
+				})
 			})
 		})
-
 	})
 }
 
-function downloadImage(url, imgName){
+function downloadImage(url, imgPath){
 	return new Promise( (resolve, reject) => {
 		debug('downloading',url)
 
-		var imagePath = path.join(config.get('folders.download'), config.get('folders.images'), imgName)
 		request.head(url, function(err, res, body){
 			// console.log('content-type:', res.headers['content-type'])
 			// console.log('content-length:', res.headers['content-length'])
