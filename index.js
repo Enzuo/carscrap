@@ -2,6 +2,7 @@ global.Promise = require('bluebird')
 var request = require('request')
 var cheerio = require('cheerio')
 var hasha = require('hasha')
+var pHash = require("phash");
 var fs = require('fs')
 var fsp = require('fs-promise')
 const path = require('path')
@@ -39,6 +40,7 @@ function readPage(pageName) {
 
 
 function downloadPage(url, pageName) {
+	//TODO return promise
 	request(url, function(error, response, html){
 
 		// First we'll check to make sure no errors occurred when making the request
@@ -64,8 +66,10 @@ function processPage(html){
 	var ads = $('.rzc-ad')
 
 	var cars = []
+	var carsImages = []
 
 	for(var i=0; i < ads.length; i++){
+	// for(var i=0; i < 15; i++){
 		var car = $(ads[i])
 		var title = car.find('.ad-title a').html()
 		var dateCreated = extractDate(car.find('.ad-date_create').html())
@@ -87,8 +91,12 @@ function processPage(html){
 		// console.log(year, km, fuel, gearbox, dept, source, price)
 		
 		// downloadImage(photos[i].attribs.src)
-		// getImage(photos[i].attribs.loadlate)
+		carsImages.push(getImage(imgUrl))
 	}
+
+	Promise.all(carsImages).then((data) =>{
+		console.log(data);
+	})
 }
 
 function extractDate(date){
@@ -98,7 +106,7 @@ function extractDate(date){
 function getImage(url){
 	return new Promise((resolve, reject) => {
 		console.log('start getImage')
-		var imgName = path.basename(url)
+		var imgName = url.replace(/\/|:/g,'_')
 		debug(imgName)
 
 		// Look in folder , no need to download if it's there
@@ -106,15 +114,19 @@ function getImage(url){
 		fsp.stat(imagePath)
 		.then(() => {
 			debug('image %s exists, loading up...', imgName)
+			pHash.imageHash(imagePath, function(err, hash){
+				if(err){
+					debug(err + imgName)
+					resolve('')
+				}
+				resolve(hash)
+			})
 		})
 		// Download image
 		.catch(() => {
 			downloadImage(url, imgName).catch((err) => {
 				debug('error', err)
 			})
-		})
-		.catch((err) => {
-			debug('error', err)
 		})
 
 	})
@@ -124,12 +136,10 @@ function downloadImage(url, imgName){
 	return new Promise( (resolve, reject) => {
 		debug('downloading',url)
 
-		// TODO : use url as image name as image name may come twice
-
 		var imagePath = path.join(config.get('folders.download'), config.get('folders.images'), imgName)
 		request.head(url, function(err, res, body){
-			console.log('content-type:', res.headers['content-type'])
-			console.log('content-length:', res.headers['content-length'])
+			// console.log('content-type:', res.headers['content-type'])
+			// console.log('content-length:', res.headers['content-length'])
 
 			request(url).pipe(fs.createWriteStream(imagePath)).on('close', () => {
 				resolve();
