@@ -23,9 +23,12 @@ url = 'http://www.reezocar.com/search/hyundai+i20.html?size=400&minYear=2015&max
 // The first parameter is our URL
 // The callback function takes 3 parameters, an error, response status code and the html
 
+var currentDate = moment().format('YYYY-MM-DD')
+
+
 init()
 // downloadPage(url, 'reezocar')
-readPage('2017-04-14-reezocar.html')
+getPage(url, currentDate + '-' + 'reezocar.html')
 .then( processPage )
 .then((cars) => {
 	debug('cars', cars)
@@ -39,25 +42,42 @@ function readPage(pageName) {
 }
 
 
+/**
+ * 
+ * @param {String} url 
+ * @param {String} pageName 
+ * @returns Promise
+ * @resolve {String} Html Code of the page
+ */
+function getPage(url, pageName) {
+	var pagePath = path.join(config.get('folders.download'), config.get('folders.pages'), pageName)		
+	return fsp.stat(pagePath)
+	.then(()=>{
+		debug('get local page', pageName)
+		return fsp.readFile( path.join(config.get('folders.download'), config.get('folders.pages'), pageName), 'utf-8')
+	})
+	.catch(()=> {
+		return downloadPage(url, pagePath)
+	})
+}
 
-function downloadPage(url, pageName) {
-	//TODO return promise
-	request(url, function(error, response, html){
-
-		// First we'll check to make sure no errors occurred when making the request
-
-		if(!error){
-			var currentDate = moment().format('YYYY-MM-DD')
-			var downloadPath = path.join(config.get('folders.download'), config.get('folders.pages'),  currentDate + '-' + pageName + '.html')
-			fs.writeFile(downloadPath, html, (err) => {
-				if(err){
-					throw err
-				}
-				debug('writeFile page')
-			});
-		}
-
-		debug('error', error)
+function downloadPage(url, pagePath) {
+	return new Promise((resolve, reject) => {
+		debug('download Page', url)
+		request(url, function(error, response, html){
+			// First we'll check to make sure no errors occurred when making the request
+			if(!error){
+				fs.writeFile(pagePath, html, (err) => {
+					if(err){
+						reject(err)
+					}
+					resolve(html)
+				});
+			}
+			else{
+				reject(error)
+			}
+		})
 	})
 }
 
@@ -102,9 +122,7 @@ function extractDate(date){
 
 function addImageToData(url, data){
 	return new Promise((resolve, reject) => {
-		console.log('start getImage')
 		var imgName = url.replace(/\/|:/g,'_')
-		debug(imgName)
 
 		// Look in folder , no need to download if it's there
 		var imagePath = path.join(config.get('folders.download'), config.get('folders.images'), imgName)
@@ -124,7 +142,8 @@ function addImageToData(url, data){
 		})
 		// Download image
 		.catch(() => {
-			downloadImage(url, imgPath).catch((err) => {
+			downloadImage(url, imagePath)
+			.then(() => {
 				pHash.imageHash(imagePath, function(err, hash){
 					if(err){
 						debug(err + imgName)
@@ -138,9 +157,9 @@ function addImageToData(url, data){
 	})
 }
 
-function downloadImage(url, imgPath){
+function downloadImage(url, imagePath){
 	return new Promise( (resolve, reject) => {
-		debug('downloading',url)
+		debug('download Image',url)
 
 		request.head(url, function(err, res, body){
 			// console.log('content-type:', res.headers['content-type'])
