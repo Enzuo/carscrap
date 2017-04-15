@@ -5,25 +5,22 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/tape test/test.*.js",
-    "start": "DEBUG=* node index.js"
+    "start": "DEBUG=* node index.js",
+    "setup": "DEBUG=* node setup"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bluebird": "^3.5.0",
+    "blueimp-md5": "^2.7.0",
     "cheerio": "^0.22.0",
     "config": "^1.25.1",
     "debug": "^2.6.3",
     "fs-promise": "^2.0.2",
     "massive": "^2.6.0",
     "moment": "^2.18.1",
-    "orm": "^3.2.3",
-    "pg": "^6.1.5",
-    "pg-hstore": "^2.3.2",
     "phash": "aaronm67/node-phash",
-    "request": "^2.81.0",
-    "sequelize": "^3.30.4",
-    "waterline": "^0.11.11"
+    "request": "^2.81.0"
   },
   "devDependencies": {
     "tape": "^4.6.3"

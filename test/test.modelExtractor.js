@@ -1,5 +1,5 @@
 const test = require('tape')
-const modelExtractor = require('../modelExtractor')
+const modelExtractor = require('../modules/modelExtractor')
 
 
 const engines = [

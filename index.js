@@ -8,8 +8,10 @@ const path = require('path')
 const debug = require('debug')('index')
 const config = require('config')
 const moment = require('moment')
+const md5 = require('blueimp-md5')
 
-const modelExtractor = require('./modelExtractor')
+const modelExtractor = require('./modules/modelExtractor')
+const db = require('./modules/database')
 
 var urls = [
 	'http://www.reezocar.com/search/hyundai+i20.html?page=1&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
@@ -17,25 +19,29 @@ var urls = [
 ]
 
 var currentDate = moment().format('YYYY-MM-DD')
-init()
+db.init().then((db) => {
+	var carsPromises = []
+	for(var i=0; i < urls.length; i++){
+		var p = getPage(urls[i], currentDate + '-' + 'reezocar_p'+i+'.html')
+		.then( processPage )
+		.then((cars) => {
+			return cars
+		})
+		.catch((err) => {
+			throw err
+		})
+		carsPromises.push(p)
+	}
 
-var carsPromises = []
-for(var i=0; i < urls.length; i++){
-	var p = getPage(urls[i], currentDate + '-' + 'reezocar_p'+i+'.html')
-	.then( processPage )
-	.then((cars) => {
-		return cars
-	})
-	.catch((err) => {
-		throw err
-	})
-	carsPromises.push(p)
-}
+	Promise.all(carsPromises).then((cars) => {
+		//http://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays-in-javascript
+		var mergedCars = [].concat.apply([], cars)
 
-Promise.all(carsPromises).then((cars) => {
-	//http://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays-in-javascript
-	var mergedCars = [].concat.apply([], cars)
-	debug(mergedCars)
+		db.car_ads.insert(mergedCars, (err, res) => {
+			if(err) debug('error in db',err)
+			debug('cars inserted', err, res)
+		})
+	})
 })
 
 /**
@@ -88,10 +94,10 @@ function processPage(html){
 		var carAd = $(ads[i])
 		var car = {}
 		car.title = carAd.find('.ad-title a').html()
-		car.dateCreated = extractDate(carAd.find('.ad-date_create').html())
-		car.imgUrl = carAd.find('.picture img').attr('src')
-		car.year = $(carAd.find('.ad-details li').get(2)).children().remove().end().text()
-		car.km = $(carAd.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g).join('')
+		car.dateAdded = extractDate(carAd.find('.ad-date_create').html())
+		var imgUrl = carAd.find('.picture img').attr('src')
+		car.year = moment($(carAd.find('.ad-details li').get(2)).children().remove().end().text()).format('YYYYMMDD')
+		car.mileage = $(carAd.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g).join('')
 		car.fuel = $(carAd.find('.ad-details li').get(4)).children().remove().end().text()
 		car.gearbox = $(carAd.find('.ad-details li').get(5)).children().remove().end().text()
 		car.location = carAd.find('.ad-picture li.loc').children().remove().end().text().trim()
@@ -104,14 +110,16 @@ function processPage(html){
 		car.price = carAd.find('.ad-price').text().match(/\d/g).join('')
 		car.model = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
-		carsImagesPromises.push(addImageToData(car.imgUrl, car))
+		carsImagesPromises.push(addImageToData(imgUrl, car))
 	}
 
 	return Promise.all(carsImagesPromises)
 }
 
 function extractDate(date){
-	return date.match(/(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/[0-9]{4}/g).join('')
+	var extracted_date = date.match(/(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/[0-9]{4}/g).join('')
+	debug('date',moment(extracted_date, 'DD/MM/YYYY').format('YYYY-MM-DD'))
+	return moment(extracted_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
 }
 
 function addImageToData(url, data){
@@ -124,13 +132,13 @@ function addImageToData(url, data){
 		data.imgPHash = ''
 		fsp.stat(imagePath)
 		.then(() => {
-			debug('image %s exists, loading up...', imgName)
+			// debug('image %s exists, loading up...', imgName)
 			pHash.imageHash(imagePath, function(err, hash){
 				if(err){
 					debug(err + imgName)
 					resolve(data)
 				}
-				data.imgPHash = hash
+				data.imgPHash = md5(hash)
 				resolve(data)
 			})
 		})
@@ -143,7 +151,7 @@ function addImageToData(url, data){
 						debug(err + imgName)
 						resolve(data)
 					}
-					data.imgPHash = hash
+					data.imgPHash = md5(hash)
 					resolve(data)
 				})
 			})
@@ -164,16 +172,4 @@ function downloadImage(url, imagePath){
 			})
 		})
 	})
-}
-
-function init(){
-	var pagesPath = path.join(config.get('folders.download'), config.get('folders.pages'))
-	if (!fs.existsSync( pagesPath )) {
-		fs.mkdirSync(pagesPath)
-	}
-	var imagePath = path.join(config.get('folders.download'), config.get('folders.images'))
-	if (!fs.existsSync( imagePath )) {
-		fs.mkdirSync(imagePath)
-	}
-	debug('init folder structure done')
 }
