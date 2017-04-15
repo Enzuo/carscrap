@@ -1,6 +1,9 @@
 {
 	"database" : {
-		"name" : "carscrap"
+		"name" : "carScrap",
+		"username" : "postgres",
+		"password" : "postgres",
+		"host" : "localhost"
 	},
 	"folders" : {
 		"download" : "data",
