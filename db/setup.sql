@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS "car_ads";
+--DROP TABLE IF EXISTS "car_ads";
 CREATE TABLE IF NOT EXISTS "car_ads" (
 	  "id"   SERIAL 
 
