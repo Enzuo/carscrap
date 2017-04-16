@@ -1,8 +1,12 @@
+const models = [
+	['hyundai i20', ['hyundai','i20'],['hyundai','20'],'i20'],
+]
+
 const engines = [
 	['1.4 crdi 90',  ['1.4','90'],  ['1.4', 'crdi'], '90'],
 	['1.1 crdi 75',  ['1.1','75'],  ['1.1', 'crdi'], 'crdi'],
 	['1.2 75',       ['1.2','75'],  '75',            'clim'],
-	['1.2 84',       ['1.2','84'],  '1.2',           'ea',     'uefa'],
+	['1.2 84',       ['1.2','84'],  '1.2',           'ea',     'uefa', ['edition','#1'], 'blackline'],
 	['1.4 100',      ['1.4','100'], '1.4'],
 	['1.4 120',      ['1.4','120']],
 	['1.0 tgdi 100', ['1.0','100'], '1.0',           'active', 't-gdi', 'tgdi', '1l'],
@@ -12,7 +16,7 @@ const engines = [
 const finitions = [
 	['initia',         'initia',             'clim'],
 	['intuitive plus', ['intuitive','plus'], 'plus', ['edition','#','1'], ['edition','84'], 'navi'],
-	['intuitive',      'intuitive',          'uefa', 'ea'               , 'sports',         'go'],
+	['intuitive',      'intuitive',          'uefa', 'ea'               , 'sports',         'go', 'euro'],
 	['creative',       'creative' ],
 	['active',         'active' ],
 	['pop pack',       'pop',                'pack', 'blackline' ],
@@ -55,4 +59,4 @@ function extractModel(title, matchTable){
 	return ''
 }
 
-module.exports = {engines, finitions, extractModel}
+module.exports = {models, engines, finitions, extractModel}

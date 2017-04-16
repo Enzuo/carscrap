@@ -38,9 +38,9 @@ db.init().then((db) => {
 		//http://stackoverflow.com/questions/10865025/merge-flatten-an-array-of-arrays-in-javascript
 		var mergedCars = [].concat.apply([], cars)
 
-		db.car_ads.insert(mergedCars, (err, res) => {
+		db.car_scrap.insert(mergedCars, (err, res) => {
 			if(err) debug('error in db',err)
-			debug('cars inserted', err, res)
+			debug('cars inserted', res)
 		})
 	})
 })
@@ -97,6 +97,7 @@ function processPage(html){
 		car.title = carAd.find('.ad-title a').html()
 		car.dateAdded = extractDate(carAd.find('.ad-date_create').html())
 		var imgUrl = carAd.find('.picture img').attr('src')
+		/* TODO can crash moment */
 		car.year = moment($(carAd.find('.ad-details li').get(2)).children().remove().end().text()).format('YYYYMMDD')
 		car.mileage = $(carAd.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g).join('')
 		car.fuel = $(carAd.find('.ad-details li').get(4)).children().remove().end().text()
@@ -109,7 +110,9 @@ function processPage(html){
 		car.departement = departement
 		car.source = carAd.find('.ad-picture li.src a').text().trim()
 		car.price = carAd.find('.ad-price').text().match(/\d/g).join('')
-		car.model = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
+		var model = carAd.find('.ad-details .brand').children().remove().end().text() + carAd.find('.ad-details .model').children().remove().end().text()
+		car.model = modelExtractor.extractModel(model, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
+		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
 		carsImagesPromises.push(addImageToData(imgUrl, car))
 	}
@@ -119,7 +122,6 @@ function processPage(html){
 
 function extractDate(date){
 	var extracted_date = date.match(/(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/[0-9]{4}/g).join('')
-	debug('date',moment(extracted_date, 'DD/MM/YYYY').format('YYYY-MM-DD'))
 	return moment(extracted_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
 }
 

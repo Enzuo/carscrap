@@ -68,7 +68,7 @@ function renderCarPreview(car){
 	html += '<img src="uploads/images/'+car.imgName+'" title="'+car.title+'" style="width:100%"/>'
 	html += '<table class="u-full-width">'
     html += '<tbody>'
-	html += '<tr><td>Model : </td><td>'+car.model+'</td></tr>'
+	html += '<tr><td>Model : </td><td>'+car.model+' - '+car.spec+'</td></tr>'
 	html += '<tr><td>Year : </td><td>'+car.year+'</td></tr>'
 	html += '<tr><td>Mileage : </td><td>'+car.mileage+'km</td></tr>'
 	html += '<tr><td>Price : </td><td>'+car.price+'€</td></tr>'
