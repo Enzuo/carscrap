@@ -31,15 +31,18 @@ function buildGraph(data) {
 	var marginTop = 5
 	var marginBottom = 5
 
+	var models = listCarModels(data)
+
 
 	var maxMileage = d3.max(data, function(d) { return d.mileage })
 	var maxPrice = d3.max(data, function(d) { return d.price })
+	var minPrice = d3.min(data, function(d) { return d.price })
 	var xScale = d3.scaleLinear()
 		.domain([0, maxMileage])
 		.range([0 + marginLeft, width - marginRight])
 
 	var yScale = d3.scaleLinear()
-		.domain([0, maxPrice])
+		.domain([minPrice, maxPrice])
 		.range([height - marginBottom, 0 + marginTop])
 
 
@@ -48,7 +51,8 @@ function buildGraph(data) {
 	.enter().append('circle')
 	.attr('cy',function(d,i){ return yScale(d.price) })
 	.attr('cx',function(d,i){ return xScale(d.mileage) })
-	.attr('fill', function(d, i) {return colorFromSellTime(d) })
+	// .attr('fill', function(d, i) {return colorFromSellTime(d) })
+	.attr('fill', function(d, i) {return colorFromModel(d, models) })
 	.attr('r', 4 )
 	.attr('opacity', 0.7 )
 	.on('mouseover', function(d) {
@@ -57,6 +61,43 @@ function buildGraph(data) {
 		.transition()
 		.style('opacity', 1)
 	})
+}
+
+function listCarModels(data){
+	var models = []
+	for(var i=0; i < data.length; i++){
+		var car = data[i]
+		models = addCarModel(car, models)
+	}
+	return models
+}
+
+function addCarModel(car, models) {
+	for (var j=0; j < models.length; j++) {
+		if(models[j].label === car.spec ){
+			models[j].nb += 1
+			models[j].minPrice = Math.min(models[j].minPrice, car.price)
+			models[j].maxPrice = Math.max(models[j].maxPrice, car.price)
+			models[j].avgPrice = models[j].avgPrice + ((car.price - models[j].avgPrice) / models[j].nb)
+			return models
+		}
+	}
+	models.push({ label : car.spec.trim(), nb : 1, minPrice : car.price, maxPrice : car.price, avgPrice : car.price, color : pickRandomColor(car.spec) })
+	return models
+}
+
+var colorsPool = ['#6ffbb0', '#8e30fb', '#124fb8', '#ab8762', '#008adc', '#55ca19', '#e59fe8', '#2e7011', '#fa5004', '#25e8d5', '#fcec33', '#058a88']
+function pickRandomColor(modelName){
+	if(modelName.trim() === ''){
+		return '#AAA'
+	}
+	if(colorsPool.length <= 0){
+		return '#000'
+	}
+	var index = Math.floor(Math.random()*colorsPool.length)
+	var color = colorsPool[index]
+	colorsPool.splice(index, 1)
+	return color
 }
 
 function renderGraph(){
@@ -76,15 +117,13 @@ function renderCarPreview(car){
 	return html
 }
 
-function colorFromModel(car){
-	switch (car.model.trim()) {
-	case '': 
-		return '#AAA'
-	case '1.2 84 intuitive' : 
-		return '#F00'
-	default:
-		return '#000'
-	}
+function colorFromModel(car, models){
+	var model = models.find((model) => {
+		console.log('comp', model.label, car.spec.trim())
+		return model.label === car.spec.trim()
+	})
+	console.log(model, car.spec.trim())
+	return model.color
 }
 
 var daysColorScale = d3.scaleLinear()
