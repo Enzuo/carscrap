@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "./node_modules/.bin/tape test/test.*.js",
-    "start": "DEBUG=* node server",
-    "scrap": "DEBUG=* node index",
-    "setup": "DEBUG=* node setup"
+    "start": "DEBUG=* node server/server",
+    "scrap": "DEBUG=* node server/index",
+    "setup": "DEBUG=* node server/setup"
   },
   "author": "",
   "license": "ISC",
