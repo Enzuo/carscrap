@@ -125,7 +125,7 @@ function extractDate(date){
 
 function addImageToData(url, data){
 	return new Promise((resolve) => {
-		var imgName = url.replace(/\/|:/g,'_')
+		var imgName = url.replace(/\/|:|\?/g,'_')
 
 		// Look in folder , no need to download if it's there
 		var imagePath = path.join(config.get('folders.download'), config.get('folders.images'), imgName)

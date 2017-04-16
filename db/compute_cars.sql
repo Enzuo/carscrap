@@ -7,7 +7,7 @@ WITH group_cars AS (
 		, MAX("dateSeen")  AS "lastDateSeen"
 		, MAX("model")     AS "model"
 		, MAX("title")     AS "title"
-		, MAX("year")      AS "year"
+		, EXTRACT(YEAR FROM MAX("year")) AS "year"
 		, MAX("mileage")   AS "mileage"
 		, MIN("price")     AS "price"
 	FROM "car_ads"
