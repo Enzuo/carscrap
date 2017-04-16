@@ -1,12 +1,15 @@
+var models = []
+
 var svg = d3.select('#graph').append('svg')
 svg.attr('height','100%')
 .attr('width','100%')
 
+
 fetch('/cars')
 .then(function(response){
 	if(response.ok){
-		var contentType = response.headers.get("content-type");
-		if(contentType && contentType.indexOf("application/json") !== -1) {
+		var contentType = response.headers.get('content-type');
+		if(contentType && contentType.indexOf('application/json') !== -1) {
 			return response.json()
 		}
 		throw 'error return type'
@@ -19,6 +22,7 @@ fetch('/cars')
 	buildGraph(response.data)
 })
 
+var renderColorFunc = colorFromModel
 
 function buildGraph(data) {
 
@@ -31,14 +35,12 @@ function buildGraph(data) {
 	var marginTop = 5
 	var marginBottom = 5
 
-	var models = listCarModels(data)
+	models = listCarModels(data)
 	models = models.sort(function(a, b) {
 		return b.nb - a.nb 
 	})
-	console.log(models)
 
-	d3.select('#legend')
-	.html(renderLegend(models))
+	document.getElementById('legend').appendChild(renderLegend(models))
 
 
 	var maxMileage = d3.max(data, function(d) { return d.mileage })
@@ -59,7 +61,7 @@ function buildGraph(data) {
 	.attr('cy',function(d){ return yScale(d.price) })
 	.attr('cx',function(d){ return xScale(d.mileage) })
 	// .attr('fill', function(d, i) {return colorFromSellTime(d) })
-	.attr('fill', function(d) {return colorFromModel(d, models) })
+	.attr('fill', function(d) {return renderColorFunc(d, models) })
 	.attr('r', 4 )
 	.attr('opacity', 0.7 )
 	.on('mouseover', function(d) {
@@ -68,7 +70,20 @@ function buildGraph(data) {
 		.transition()
 		.style('opacity', 1)
 	})
+
+	document.getElementById('button-models').addEventListener('click', function(){
+		renderColorFunc = colorFromModel
+		updateGraphColors()
+	})
+
+	document.getElementById('button-market-time').addEventListener('click', function(){
+		renderColorFunc = colorFromMarketTime
+		updateGraphColors()
+
+		// svg.selectAll('circle').attr('fill', function(d) {return colorFromSellTime(d) })
+	})
 }
+
 
 function listCarModels(data){
 	var models = []
@@ -77,6 +92,13 @@ function listCarModels(data){
 		models = addCarModel(car, models)
 	}
 	return models
+}
+
+function selectCarModel(index){
+	for(var i=0; i<models.length; i++){
+		models[i].active = false
+	}
+	models[index].active = true
 }
 
 function addCarModel(car, models) {
@@ -96,7 +118,7 @@ function addCarModel(car, models) {
 var colorsPool = ['#6ffbb0', '#8e30fb', '#124fb8', '#ab8762', '#008adc', '#55ca19', '#e59fe8', '#2e7011', '#fa5004', '#25e8d5', '#fcec33', '#058a88', '#e60b7d', '#f99823']
 function pickRandomColor(modelName){
 	if(modelName.trim() === ''){
-		return '#AAA'
+		return '#999'
 	}
 	if(colorsPool.length <= 0){
 		return '#000'
@@ -107,26 +129,40 @@ function pickRandomColor(modelName){
 	return color
 }
 
-function renderGraph(){
-
+function renderLegend(models){
+	var table = document.createElement('table')
+	table.className = 'u-full-width'
+	var tbody = document.createElement('tbody')
+	table.appendChild(tbody)
+	for(var i=0; i<models.length; i++){
+		var tr = document.createElement('tr')
+		tr.className = 'car-model'
+		tr.setAttribute('value', i)
+		tr.addEventListener('click',clickLegendModel)
+		tr.innerHTML = '<td><div class="legend-color" style="background-color:'+models[i].color+';"></div>'+models[i].label+'</td><td>'+Math.floor(models[i].avgPrice)+'</td><td>'+models[i].nb+'</td>'
+		tbody.appendChild(tr)
+	}
+	return table
 }
 
-function renderLegend(models){
-	var html = ''
-	html += '<table class="u-full-width">'
-	html += '<tbody>'
-	for(var i=0; i<models.length; i++){
-		html+='<tr><td><div class="legend-color" style="background-color:'+models[i].color+';"></div>'+models[i].label+'</td><td>'+Math.floor(models[i].avgPrice)+'</td><td>'+models[i].nb+'</td></tr>'
-	}
-	html += '</tbody></table>'
-	return html
+function clickLegendModel (event, target) {
+	console.log('clickLegendModel', event, target, this.getAttribute('value'))
+	selectCarModel(this.getAttribute('value'))
+	updateGraphColors()
+}
+
+function updateGraphColors (){
+	var svga = svg.transition()
+	svga.selectAll('circle')
+	.duration(750)
+	.attr('fill', function(d) {return renderColorFunc(d) })
 }
 
 function renderCarPreview(car){
 	var html = ''
-	html += '<img src="uploads/images/'+car.imgName+'" title="'+car.title+'" style="width:100%"/>'
+	html += '<img class="car-image" align="middle" src="uploads/images/'+car.imgName+'" title="'+car.title+'" style="width:100%"/>'
 	html += '<table class="u-full-width">'
-    html += '<tbody>'
+	html += '<tbody>'
 	html += '<tr><td>Model : </td><td>'+car.model+' - '+car.spec+'</td></tr>'
 	html += '<tr><td>Year : </td><td>'+car.year+'</td></tr>'
 	html += '<tr><td>Mileage : </td><td>'+car.mileage+'km</td></tr>'
@@ -135,20 +171,29 @@ function renderCarPreview(car){
 	return html
 }
 
-function colorFromModel(car, models){
+function colorFromModel(car){
 	var model = models.find((model) => {
 		return model.label === car.spec.trim()
 	})
-	return model.color
+	if(model.active !== false){
+		return model.color
+	}
+	return '#DDD'
 }
 
 var daysColorScale = d3.scaleLinear()
 .domain([0,120])
 .range(['pink','blue'])
 
-function colorFromSellTime(car){
+function colorFromMarketTime(car){
 	var date1 = new Date(car.lastDateSeen)
 	var date2 = new Date(car.dateAdded)
 	var days = Math.floor((date1 - date2) / (1000*60*60*24))
-	return daysColorScale(days)
+	var model = models.find((model) => {
+		return model.label === car.spec.trim()
+	})
+	if(model.active !== false){
+		return daysColorScale(days)
+	}
+	return '#DDD'
 }
