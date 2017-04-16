@@ -7,7 +7,7 @@ var connectionString = 'postgres://'+config.get('database.username')+':'+config.
 module.exports = {
 	init : function () {
 		return new Promise((resolve, reject) => {
-			debug('connecting to db...')
+			debug('establishing connection...')
 			massive.connect({connectionString}, function(err, db){
 				if (err) return reject(err)
 				resolve(db)
