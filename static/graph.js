@@ -32,6 +32,13 @@ function buildGraph(data) {
 	var marginBottom = 5
 
 	var models = listCarModels(data)
+	models = models.sort(function(a, b) {
+		return b.nb - a.nb 
+	})
+	console.log(models)
+
+	d3.select('#legend')
+	.html(renderLegend(models))
 
 
 	var maxMileage = d3.max(data, function(d) { return d.mileage })
@@ -49,10 +56,10 @@ function buildGraph(data) {
 	svg.selectAll('circle')
 	.data(data)
 	.enter().append('circle')
-	.attr('cy',function(d,i){ return yScale(d.price) })
-	.attr('cx',function(d,i){ return xScale(d.mileage) })
+	.attr('cy',function(d){ return yScale(d.price) })
+	.attr('cx',function(d){ return xScale(d.mileage) })
 	// .attr('fill', function(d, i) {return colorFromSellTime(d) })
-	.attr('fill', function(d, i) {return colorFromModel(d, models) })
+	.attr('fill', function(d) {return colorFromModel(d, models) })
 	.attr('r', 4 )
 	.attr('opacity', 0.7 )
 	.on('mouseover', function(d) {
@@ -74,7 +81,7 @@ function listCarModels(data){
 
 function addCarModel(car, models) {
 	for (var j=0; j < models.length; j++) {
-		if(models[j].label === car.spec ){
+		if(models[j].label === car.spec.trim() ){
 			models[j].nb += 1
 			models[j].minPrice = Math.min(models[j].minPrice, car.price)
 			models[j].maxPrice = Math.max(models[j].maxPrice, car.price)
@@ -86,7 +93,7 @@ function addCarModel(car, models) {
 	return models
 }
 
-var colorsPool = ['#6ffbb0', '#8e30fb', '#124fb8', '#ab8762', '#008adc', '#55ca19', '#e59fe8', '#2e7011', '#fa5004', '#25e8d5', '#fcec33', '#058a88']
+var colorsPool = ['#6ffbb0', '#8e30fb', '#124fb8', '#ab8762', '#008adc', '#55ca19', '#e59fe8', '#2e7011', '#fa5004', '#25e8d5', '#fcec33', '#058a88', '#e60b7d', '#f99823']
 function pickRandomColor(modelName){
 	if(modelName.trim() === ''){
 		return '#AAA'
@@ -104,6 +111,17 @@ function renderGraph(){
 
 }
 
+function renderLegend(models){
+	var html = ''
+	html += '<table class="u-full-width">'
+	html += '<tbody>'
+	for(var i=0; i<models.length; i++){
+		html+='<tr><td><div class="legend-color" style="background-color:'+models[i].color+';"></div>'+models[i].label+'</td><td>'+Math.floor(models[i].avgPrice)+'</td><td>'+models[i].nb+'</td></tr>'
+	}
+	html += '</tbody></table>'
+	return html
+}
+
 function renderCarPreview(car){
 	var html = ''
 	html += '<img src="uploads/images/'+car.imgName+'" title="'+car.title+'" style="width:100%"/>'
@@ -119,10 +137,8 @@ function renderCarPreview(car){
 
 function colorFromModel(car, models){
 	var model = models.find((model) => {
-		console.log('comp', model.label, car.spec.trim())
 		return model.label === car.spec.trim()
 	})
-	console.log(model, car.spec.trim())
 	return model.color
 }
 

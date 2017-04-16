@@ -41,6 +41,11 @@ db.init().then((db) => {
 		db.car_scrap.insert(mergedCars, (err, res) => {
 			if(err) debug('error in db',err)
 			debug('cars inserted', res)
+			debug('computing car flat...')
+			db.compute_cars((err)=>{
+				if(err) throw err
+				debug('car flat computed succesfully')
+			})
 		})
 	})
 })
