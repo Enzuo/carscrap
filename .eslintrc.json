@@ -8,10 +8,16 @@
     "globals":{
         "d3" : true
     },
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:react/recommended"],
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true
+        }
     },
+    "plugins": [
+        "react"
+    ],
     "rules": {
         "indent": [
             "warn",
