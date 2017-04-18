@@ -82,4 +82,8 @@ WITH group_cars AS (
 	SELECT "imgPHash", "model", "spec", "year", "mileage", "price", "dateAdded", "lastDateSeen", "title", "imgName", "fuel", "gearbox", "departement", "source" 
 	FROM car_to_insert
 )
-SELECT * FROM "car_flat"
+SELECT 
+	*
+FROM (SELECT COUNT(*) AS "countTotal" FROM "car_flat") total
+LEFT JOIN (SELECT COUNT(*) AS "countInserted" FROM car_to_insert) inserted ON 1=1
+LEFT JOIN (SELECT COUNT(*) AS "countUpdate"   FROM car_to_update) updated ON 1=1

@@ -42,9 +42,9 @@ db.init().then((db) => {
 			if(err) debug('error in db',err)
 			debug('cars inserted', res)
 			debug('computing car flat...')
-			db.compute_cars((err)=>{
+			db.compute_cars((err, result)=>{
 				if(err) throw err
-				debug('car flat computed succesfully')
+				debug('car flat computed succesfully', result)
 			})
 		})
 	})
