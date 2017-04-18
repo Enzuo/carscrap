@@ -11,7 +11,7 @@ var app = express()
 
 
 app.use('/static', express.static('./client/static'))
-app.use('/uploads', express.static(path.join('server', config.get('folders.download'))))
+app.use('/uploads', express.static(config.get('folders.download')))
 app.use('/scripts', express.static('./node_modules/d3/build'))
 
 db.init().then((db) => {
