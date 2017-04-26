@@ -58,7 +58,7 @@ function downloadPage(url){
 	}
 }
 
-
+// https://github.com/ariya/phantomjs/blob/master/examples/waitfor.js
 function waitFor(testFx, timeOutMillis) {
 	return new Promise((resolve, reject) => {
 		var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3000 //< Default Max Timout is 3s
@@ -89,3 +89,5 @@ function waitFor(testFx, timeOutMillis) {
 
 
 module.exports = { downloadPage }
+
+//ctrl.setPage_reload(2)
