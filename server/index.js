@@ -15,11 +15,13 @@ const db = require('./modules/database')
 
 const normalScrap = require('./modules/normalScrap')
 const phantomScrap = require('./modules/phantomScrap')
+const extractor = require('./modules/extractor')
 
 var urls = [
 	{
 		url : 'http://www.reezocar.com/search/hyundai+i20.html?page=1&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
 		scraper : normalScrap,
+		processPage : extractor.reezocar,
 	},
 	// {
 	// 	url : 'http://www.reezocar.com/search/hyundai+i20.html?page=2&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
@@ -29,19 +31,23 @@ var urls = [
 	// 	url : 'http://www.reezocar.com/search/hyundai+i20.html?page=3&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
 	// 	scraper : normalScrap,
 	// },
-	// {
-	// 	url : 'http://www.leparking.fr/#!/voiture-occasion/i20.html',
-	// 	scraper : phantomScrap,
-	// }
+	{
+		url : 'http://www.leparking.fr/#!/voiture-occasion/i20.html',
+		scraper : phantomScrap,
+		processPage : extractor.leparking
+	}
 ]
 
 db.init()
 .then((db) => {
 	var carsPromises = []
 	for(var i=0; i < urls.length; i++){
-		var p = getPage(urls[i].url, urls[i].scraper)
+		var url = urls[i]
+		var p = getPage(url.url, url.scraper)
 		.then((html) => {
-			return processPage(html) 
+			debug(urls, urls[i], i, url)
+			//http://stackoverflow.com/questions/7053965/when-using-callbacks-inside-a-loop-in-javascript-is-there-any-way-to-save-a-var
+			return url.processPage(html) 
 		})
 		.then((cars) => {
 			return Promise.all(cars.map(addImageHash)) //TODO : cars.map(addImageHash)
@@ -98,55 +104,6 @@ function getPage(url, scraper) {
 			return _html
 		})
 	})
-}
-
-/**
- * Process Reezocar style html to extract cars informations
- * @param {*} html 
- * @return return array of cars
- */
-function processPage(html){
-	var $ = cheerio.load(html)
-
-	var ads = $('.rzc-ad')
-
-	var cars = []
-
-	for(var i=0; i < ads.length; i++){
-		var carAd = $(ads[i])
-		var car = {}
-		car.title = carAd.find('.ad-title a').html()
-		car.dateAdded = extractDate(carAd.find('.ad-date_create').html())
-		car.imgUrl = carAd.find('.picture img').attr('src')
-		/* TODO can crash moment */
-		car.year = moment($(carAd.find('.ad-details li').get(2)).children().remove().end().text()).format('YYYYMMDD')
-		car.mileage = $(carAd.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g).join('')
-		car.fuel = $(carAd.find('.ad-details li').get(4)).children().remove().end().text()
-		car.gearbox = $(carAd.find('.ad-details li').get(5)).children().remove().end().text()
-		car.location = carAd.find('.ad-picture li.loc').children().remove().end().text().trim()
-		var departement = car.location.match(/\d\d|^$/)
-		if(departement){
-			departement = departement.join('')
-		}
-		car.departement = departement
-		car.source = carAd.find('.ad-picture li.src a').text().trim()
-		car.price = carAd.find('.ad-price').text().match(/\d/g).join('')
-		var model = carAd.find('.ad-details .brand').children().remove().end().text() + carAd.find('.ad-details .model').children().remove().end().text()
-		car.model = modelExtractor.extractModel(model, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
-		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
-		
-		// carsImagesPromises.push(addImageToData(imgUrl, car))
-		cars.push(car)
-	}
-
-	return cars
-	//TODO
-	return Promise.all(carsImagesPromises)
-}
-
-function extractDate(date){
-	var extracted_date = date.match(/(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/[0-9]{4}/g).join('')
-	return moment(extracted_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
 }
 
 function addImageHash(car){
