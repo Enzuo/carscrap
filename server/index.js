@@ -18,11 +18,10 @@ const phantomScrap = require('./modules/phantomScrap')
 const extractor = require('./modules/extractor')
 
 var urls = [
-	{
-		url : 'http://www.reezocar.com/search/hyundai+i20.html?page=1&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
-		scraper : normalScrap,
-		processPage : extractor.reezocar,
-	},
+	// {
+	// 	url : 'http://www.reezocar.com/search/hyundai+i20.html?page=1&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
+	// 	scraper : normalScrap,
+	// },
 	// {
 	// 	url : 'http://www.reezocar.com/search/hyundai+i20.html?page=2&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
 	// 	scraper : normalScrap,
@@ -34,7 +33,6 @@ var urls = [
 	{
 		url : 'http://www.leparking.fr/#!/voiture-occasion/i20.html',
 		scraper : phantomScrap,
-		processPage : extractor.leparking
 	}
 ]
 
@@ -45,9 +43,7 @@ db.init()
 		var url = urls[i]
 		var p = getPage(url.url, url.scraper)
 		.then((html) => {
-			debug(urls, urls[i], i, url)
-			//http://stackoverflow.com/questions/7053965/when-using-callbacks-inside-a-loop-in-javascript-is-there-any-way-to-save-a-var
-			return url.processPage(html) 
+			return extractor.processPage(html) 
 		})
 		.then((cars) => {
 			return Promise.all(cars.map(addImageHash)) //TODO : cars.map(addImageHash)
