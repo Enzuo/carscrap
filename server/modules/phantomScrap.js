@@ -9,6 +9,8 @@ var _phInstance
 var _page
 var _ressourceLoader = []
 
+var _scrapedHTML = ''
+
 
 function initPhantomJs(){
 	debug('initPhantomJS')
@@ -50,6 +52,12 @@ function initPhantomJs(){
 	})
 }
 
+function closePhantomJS(){
+	debug('close phantom instance')
+	_page.close()
+	_phInstance.exit()
+}
+
 function downloadPage(url){
 
 	return initPhantomJs()
@@ -61,10 +69,13 @@ function downloadPage(url){
 	})
 	.then(loadResultPage)
 	.then(content => {
-		debug('close phantom instance')
-		_page.close()
-		_phInstance.exit()
-		return content
+		closePhantomJS()
+		return _scrapedHTML
+	})
+	.catch((err) => {
+		debug('ERROR', err)
+		closePhantomJS()
+		return _scrapedHTML
 	})
 
 	function loadResultPage(){
@@ -74,7 +85,7 @@ function downloadPage(url){
 		})
 		.then(leParking.getResultList)
 		.then(resultsHTML => {
-			console.log('page 1', resultsHTML)
+			_scrapedHTML += resultsHTML
 		})
 		.then(() => {
 			return leParking.loadPage(2)
@@ -85,7 +96,7 @@ function downloadPage(url){
 		})
 		.then(leParking.getResultList)
 		.then(resultsHTML => {
-			console.log('page 2', resultsHTML)
+			_scrapedHTML += resultsHTML
 		})
 	}
 
@@ -173,7 +184,11 @@ var leParking = {
 
 	waitForPageLoad : function () {
 		return new Promise((resolve, reject) => {
+			var timeoutId = setTimeout(() => {
+				reject('TIMEOUT waitForPageLoad')
+			}, 120000)
 			waitAfterLastRequest(() => {
+				clearTimeout(timeoutId)
 				resolve()
 			})
 		})
@@ -225,7 +240,7 @@ function waitFor(testFx, timeOutMillis) {
 					if(!condition) {
 						// If condition still not fulfilled (timeout but condition is 'false')
 						debug("waitFor() timeout")
-						reject('timeout')
+						reject('TIMEOUT waitFor')
 						clearInterval(interval)
 					} else {
 						// Condition fulfilled (timeout and/or condition is 'true')
