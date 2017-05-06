@@ -14,6 +14,9 @@ const engines = [
 ]
 
 const finitions = [
+	// 1 gen
+	['inventive',      'inventive'],
+	// 2 gen
 	['initia',         'initia',             'clim'],
 	['intuitive plus', ['intuitive','plus'], 'plus', ['edition','#','1'], ['edition','84'], 'navi'],
 	['intuitive',      'intuitive',          'uefa', 'ea'               , 'sports',         'go', 'euro'],

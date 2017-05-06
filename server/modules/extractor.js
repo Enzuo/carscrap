@@ -68,10 +68,20 @@ function leparking(html){
 		}
 
 		var detailsBloc = carAd.find('.left-annonce-bloc li')
-		car.year = $(detailsBloc.get(2)).text().match(/\d{4}/).join('')
-		car.mileage = $(detailsBloc.get(1)).text()
-		car.fuel = $(detailsBloc.get(0)).text()
-		car.gearbox = $(detailsBloc.get(4)).text()
+		var year = $(detailsBloc.get(2)).text().match(/\d{4}/)
+		car.year = year !== null ? year[0] : ''
+
+		var mileage = $(detailsBloc.get(1)).text().match(/\d/g)
+		car.mileage = mileage !== null ? mileage.join('') : 0
+		
+		var fuel = $(detailsBloc.get(0)).text()
+		var fuelMatch = fuel.match(/essence|diesel/ig)
+		car.fuel = fuelMatch !== null ? fuelMatch[0] : fuel
+		
+		var gearbox = $(detailsBloc.get(4)).text()
+		var gearboxMatch = gearbox.match(/manuel|auto/ig)
+		car.gearbox = gearboxMatch !== null ? gearboxMatch[0] : gearbox
+
 		car.location = $(detailsBloc.get(5)).text()
 		var departement = car.location.match(/\d\d|^$/)
 		if(departement){
@@ -87,7 +97,10 @@ function leparking(html){
 			sources += $(element).text()
 		})
 		car.source = sources
-		car.price = carAd.find('.prix-bf .prix').text().match(/\d/g).join('')
+		var price = carAd.find('.prix-bf .prix').text().match(/\d/g)
+		if(price !== null){
+			car.price = price.join('')
+		}
 
 		// car.title += ' ' + $(detailsBloc.get(6)).children().remove().end().text()
 		car.model = modelExtractor.extractModel(car.title, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
@@ -96,7 +109,9 @@ function leparking(html){
 		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
 		// console.log('car', car)
-		cars.push(car)
+		if(car.imgUrl && car.imgUrl !== ''){
+			cars.push(car)
+		}
 	}
 	return cars
 }
