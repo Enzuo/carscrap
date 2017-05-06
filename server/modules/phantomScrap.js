@@ -10,6 +10,8 @@ var _page
 var _ressourceLoader = []
 
 var _scrapedHTML = ''
+var _lastScrapedHTML = ''
+var _pageNumberToLoad = 2
 
 
 function initPhantomJs(){
@@ -29,7 +31,7 @@ function initPhantomJs(){
 		// }
 
 		page.on('onResourceRequested', function (requestData, networkRequest) {
-			debug('!request',requestData.url,'ID:',requestData.id)
+			// debug('!request',requestData.url,'ID:',requestData.id)
 			_ressourceLoader.push({
 				id   : requestData.id,
 				url  : requestData.url,
@@ -39,7 +41,7 @@ function initPhantomJs(){
 		})
 
 		page.on('onResourceReceived', function(responseData){
-			debug('onResourceReceived', responseData.id)
+			// debug('onResourceReceived', responseData.id)
 			var request = _ressourceLoader.find((request) => {
 				if(request.id === responseData.id){
 					return true
@@ -67,8 +69,9 @@ function downloadPage(url){
 		})
 		return _page.open(url)
 	})
-	.then(loadResultPage)
-	.then(content => {
+	.then(loadFirstResultPage)
+	.then(loadAllOtherPages)
+	.then(() => {
 		closePhantomJS()
 		return _scrapedHTML
 	})
@@ -78,24 +81,39 @@ function downloadPage(url){
 		return _scrapedHTML
 	})
 
-	function loadResultPage(){
+	function loadAllOtherPages(){
+		return promiseWhile( () => {
+			// > 2500 cause there can be sponsor ads on every empty pages (about 2056 characters)
+			// TODO should count stuff with cheerio instead here
+			var shouldContinue = _lastScrapedHTML !== '' && _lastScrapedHTML.length > 2500 && _pageNumberToLoad <= 40 ? true : false 
+			debug('shouldContinueLoadingPages ?', shouldContinue, _pageNumberToLoad) 
+			return shouldContinue
+		}, 
+		() => {
+			debug('load Page', _pageNumberToLoad)
+			return leParking.loadPage(_pageNumberToLoad)		
+			.then(leParking.waitForPageLoad)
+			.then(() => {
+				return waitFor(leParking.isParkingResultatsLoaded, 7000)
+			})
+			.then(leParking.getResultList)
+			.then(resultsHTML => {
+				_pageNumberToLoad++
+				_lastScrapedHTML = resultsHTML
+				_scrapedHTML += resultsHTML
+			})
+		})
+	}
+
+	function loadFirstResultPage(){
+		debug('start scraping')
 		return leParking.waitForPageLoad()
 		.then(() => {
 			return waitFor(leParking.isParkingResultatsLoaded, 7000)
 		})
 		.then(leParking.getResultList)
 		.then(resultsHTML => {
-			_scrapedHTML += resultsHTML
-		})
-		.then(() => {
-			return leParking.loadPage(2)
-		})
-		.then(leParking.waitForPageLoad)
-		.then(() => {
-			return waitFor(leParking.isParkingResultatsLoaded, 7000)
-		})
-		.then(leParking.getResultList)
-		.then(resultsHTML => {
+			_lastScrapedHTML = resultsHTML
 			_scrapedHTML += resultsHTML
 		})
 	}
