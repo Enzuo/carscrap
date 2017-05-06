@@ -27,12 +27,25 @@ function initPhantomJs(){
 		// }
 
 		page.on('onResourceRequested', function (requestData, networkRequest) {
-			debug('!request',requestData.url)
+			debug('!request',requestData.url,'ID:',requestData.id)
 			_ressourceLoader.push({
+				id   : requestData.id,
 				url  : requestData.url,
 				time : Date.now(),
 				done : false,
 			})
+		})
+
+		page.on('onResourceReceived', function(responseData){
+			debug('onResourceReceived', responseData.id)
+			var request = _ressourceLoader.find((request) => {
+				if(request.id === responseData.id){
+					return true
+				}
+			})
+			request.done = true
+			request.timeStarted = request.time
+			request.time = Date.now()
 		})
 	})
 }
@@ -151,11 +164,10 @@ var leParking = {
 		}, number)
 		.then((result) => {
 			debug('loadPage result ?', result)
-			return new Promise((resolve) => {
-				setTimeout(() => {
-					resolve()
-				}, 5000)
-			})
+			_ressourceLoader = []
+			return waitFor(() => {
+				return Promise.resolve(_ressourceLoader.length > 0 ? true : false)
+			}, 5000)
 		})
 	},
 
@@ -177,10 +189,20 @@ var leParking = {
 }
 
 function waitAfterLastRequest (callback) {
+
+	var undone = _ressourceLoader.find((element) => {
+		return element.done === false ? true : false
+	})
 	var timeToWait = 5000
 	var currentTime = Date.now()
 	var timeSinceLastRequest = currentTime - _ressourceLoader[_ressourceLoader.length-1].time
 	var timeRemainingToWait = timeToWait - timeSinceLastRequest
+
+	if(undone){
+		debug('request not finished')
+		timeRemainingToWait = timeToWait
+	}
+
 	debug('waitAfterLastRequest', timeRemainingToWait)
 	if(timeRemainingToWait <= 0){
 		return callback()
@@ -203,7 +225,7 @@ function waitFor(testFx, timeOutMillis) {
 					if(!condition) {
 						// If condition still not fulfilled (timeout but condition is 'false')
 						debug("waitFor() timeout")
-						resolve('timeout')
+						reject('timeout')
 						clearInterval(interval)
 					} else {
 						// Condition fulfilled (timeout and/or condition is 'true')
