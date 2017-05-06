@@ -26,7 +26,8 @@
     "phash": "aaronm67/node-phash",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
-    "request": "^2.81.0"
+    "request": "^2.81.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",

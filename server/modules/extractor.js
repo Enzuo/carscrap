@@ -65,11 +65,12 @@ function leparking(html){
 
 		if(car.imgUrl === '/lng/fr_FR/images/visuel_generique.jpg'){
 			car.imgUrl = 'http://www.leparking.fr/lng/fr_FR/images/visuel_generique.jpg'
+			continue
 		}
 
 		var detailsBloc = carAd.find('.left-annonce-bloc li')
 		var year = $(detailsBloc.get(2)).text().match(/\d{4}/)
-		car.year = year !== null ? year[0] : ''
+		car.year = year !== null ? moment(year[0]).format('YYYYMMDD') : ''
 
 		var mileage = $(detailsBloc.get(1)).text().match(/\d/g)
 		car.mileage = mileage !== null ? mileage.join('') : 0
@@ -97,6 +98,8 @@ function leparking(html){
 			sources += $(element).text()
 		})
 		car.source = sources
+		car.source = car.source.substring(0,255)
+		
 		var price = carAd.find('.prix-bf .prix').text().match(/\d/g)
 		if(price !== null){
 			car.price = price.join('')
@@ -108,6 +111,7 @@ function leparking(html){
 		car.title += ' ' + $(detailsBloc.get(6)).text()
 		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
+
 		// console.log('car', car)
 		if(car.imgUrl && car.imgUrl !== ''){
 			cars.push(car)
