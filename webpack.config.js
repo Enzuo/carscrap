@@ -9,8 +9,9 @@ const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
 
 module.exports = {
 	entry: './client/src/index.js',
+	devtool: 'source-map',
 	output: {
-		path: path.resolve('dist'),
+		path: path.resolve('client/dist'),
 		filename: 'index_bundle.js'
 	},
 	module: {
