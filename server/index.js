@@ -33,7 +33,7 @@ var urls = [
 	{
 		// url : 'http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26slider_prix%3D1%7C12000%26slider_millesime%3D2015%7C2017',
 		// url : 'http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26id_finition%3D379%26slider_prix%3D1%7C12000%26slider_millesime%3D2015%7C2017',
-		url : 'http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26slider_prix%3D1%7C24000%26slider_millesime%3D2015%7C2017',
+		url : 'http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26slider_prix%3D1%7C24000%26slider_km%3D1%7C100000%26slider_millesime%3D2015%7C2017',
 		scraper : phantomScrap,
 	}
 ]
@@ -51,7 +51,7 @@ db.init()
 			return Promise.all(cars.map(addImageHash))
 		})
 		.catch((err) => {
-			throw err
+			debug('got an error scrapping all cars', err)
 		})
 		carsPromises.push(p)
 	}
@@ -61,19 +61,19 @@ db.init()
 		var mergedCars = [].concat.apply([], cars)
 
 		// console.log('merged cars', mergedCars)
-		debug('got all merged Cars from different url sources')
+		debug('got all merged Cars from different url sources', mergedCars.length)
 		var allCarScraps = prepareCarScrap(mergedCars, ['title','dateAdded','year','mileage','fuel','gearbox','location','departement','source','price','model','spec','imgPHash','imgName'])
 		
 		debug('got allCarScraps ready for insert')
 
 		db.car_scrap.insert(allCarScraps, (err, res) => {
-			if(err) debug('error in db',err)
+			if(err) return debug('error in db',err)
 			debug('cars inserted', res)
 			debug('computing car flat...')
-			// db.compute_cars((err, result)=>{
-			// 	if(err) throw err
-			// 	debug('car flat computed succesfully', result)
-			// })
+			db.compute_cars((err, result)=>{
+				if(err) throw err
+				debug('car flat computed succesfully', result)
+			})
 		})
 	})
 })

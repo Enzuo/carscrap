@@ -36,13 +36,19 @@ function reezocar(html){
 		}
 		car.departement = departement
 		car.source = carAd.find('.ad-picture li.src a').text().trim()
-		car.price = carAd.find('.ad-price').text().match(/\d/g).join('')
+		
+		var price = carAd.find('.ad-price').text().match(/\d/g)
+		if(price !== null){
+			car.price = price.join('')
+		}
 		var model = carAd.find('.ad-details .brand').children().remove().end().text() + carAd.find('.ad-details .model').children().remove().end().text()
 		car.model = modelExtractor.extractModel(model, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
 		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
 		// carsImagesPromises.push(addImageToData(imgUrl, car))
-		cars.push(car)
+		if(car.imgUrl && car.price){
+			cars.push(car)
+		}
 	}
 
 	return cars
