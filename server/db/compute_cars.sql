@@ -18,7 +18,7 @@ WITH group_cars AS (
 	GROUP BY "imgPHash"
 )
 , full_car_scraps AS (
-	SELECT  
+	SELECT DISTINCT ON ("imgPHash")
 		  group_cars.*
 		, "car_scrap"."imgName"
 		, "car_scrap"."fuel"
@@ -27,6 +27,7 @@ WITH group_cars AS (
 		, "car_scrap"."source"
 	FROM group_cars
 	INNER JOIN "car_scrap" ON "car_scrap"."id" = group_cars."idScrap"
+	ORDER BY "imgPHash", "car_scrap"."createdAt" DESC
 )
 , car_to_update AS (
 	SELECT

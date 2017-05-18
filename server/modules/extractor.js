@@ -85,11 +85,11 @@ function leparking(html){
 		var fuelMatch = fuel.match(/essence|diesel/ig)
 		car.fuel = fuelMatch !== null ? fuelMatch[0] : fuel
 		
-		var gearbox = $(detailsBloc.get(4)).text()
+		var gearbox = $(detailsBloc.get(3)).text()
 		var gearboxMatch = gearbox.match(/manuel|auto/ig)
 		car.gearbox = gearboxMatch !== null ? gearboxMatch[0] : gearbox
 
-		car.location = $(detailsBloc.get(5)).text()
+		car.location = $(detailsBloc.get(4)).text()
 		var departement = car.location.match(/\d\d|^$/)
 		if(departement){
 			departement = departement.join('')
