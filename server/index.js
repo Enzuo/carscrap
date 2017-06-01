@@ -67,7 +67,10 @@ db.init()
 		debug('got allCarScraps ready for insert')
 
 		db.car_scrap.insert(allCarScraps, (err, res) => {
-			if(err) return debug('error in db',err)
+			if(err) {
+				debug(allCarScraps)
+				return debug('error in db',err)
+			}
 			debug('cars inserted', res)
 			debug('computing car flat...')
 			db.compute_cars((err, result)=>{
@@ -143,7 +146,7 @@ function getImage(url){
 			.then(() => {
 				pHash.imageHash(imagePath, function(err, hash){
 					if(err){
-						debug(err + imgName)
+						debug(err, imgName)
 						resolve(image)
 					}
 					image.imgPHash = md5(hash)

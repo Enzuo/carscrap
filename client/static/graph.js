@@ -62,6 +62,8 @@ function buildGraph(data) {
 	.attr('cx',function(d){ return xScale(d.mileage) })
 	// .attr('fill', function(d, i) {return colorFromSellTime(d) })
 	.attr('fill', function(d) {return renderColorFunc(d, models) })
+	.attr('stroke', function(d) {return d.isSold ? '#f00' : '#0f0' })
+	.attr('stroke-width', function(d) {return borderWidthFunc(d) })
 	.attr('r', 4 )
 	.attr('opacity', 0.7 )
 	.on('mouseover', function(d) {
@@ -156,6 +158,7 @@ function updateGraphColors (){
 	svga.selectAll('circle')
 	.duration(750)
 	.attr('fill', function(d) {return renderColorFunc(d) })
+	.attr('stroke-width', function(d) {return borderWidthFunc(d) })
 }
 
 function renderCarPreview(car){
@@ -179,6 +182,16 @@ function colorFromModel(car){
 		return model.color
 	}
 	return '#DDD'
+}
+
+function borderWidthFunc(car){
+	var model = models.find((model) => {
+		return model.label === car.spec.trim()
+	})
+	if(!car.isSold && model.active !== false){
+		return 1
+	}
+	return 0
 }
 
 var daysColorScale = d3.scaleLinear()

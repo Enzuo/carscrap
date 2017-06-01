@@ -16,7 +16,8 @@ app.use('/scripts', express.static('./node_modules/d3/build'))
 
 db.init().then((db) => {
 	app.get('/cars', (req, res) => {
-		db.car_flat.where('model=$1', ['hyundai i20'], (err, result) => {
+		// db.car_flat.where('model=$1', ['hyundai i20'], (err, result) => {
+		db.get_car_flat(['hyundai i20'], (err, result) => {
 			var success = false
 			if(!err) success = true
 			res.json({
