@@ -64,7 +64,7 @@ function leparking(html){
 		var carAd = $(ads[i])
 		var car = {}
 
-		car.title = carAd.find('.bloc-titre-list').text().replace(/\n/g, ' ').replace(/ {2,}/g, ' ').trim()
+		car.title = carAd.find('.block-title-list').text().replace(/\n/g, ' ').replace(/ {2,}/g, ' ').trim()
 		car.dateAdded = extractDate(carAd.find('.btn-publication').text())
 		car.lastSeen = extractDate(carAd.find('.btn-maj').text())
 		car.imgUrl = carAd.find('.figure img').attr('src')
@@ -74,7 +74,7 @@ function leparking(html){
 			continue
 		}
 
-		var detailsBloc = carAd.find('.left-annonce-bloc li')
+		var detailsBloc = carAd.find('.block-info li')
 		var year = $(detailsBloc.get(2)).text().match(/\d{4}/)
 		car.year = year !== null ? moment(year[0]).format('YYYYMMDD') : ''
 
@@ -106,7 +106,7 @@ function leparking(html){
 		car.source = sources
 		car.source = car.source.substring(0,255)
 		
-		var price = carAd.find('.prix-bf .prix').text().match(/\d/g)
+		var price = carAd.find('.price-block .prix').text().match(/\d/g)
 		if(price !== null){
 			car.price = price.join('')
 		}
@@ -114,12 +114,12 @@ function leparking(html){
 		// car.title += ' ' + $(detailsBloc.get(6)).children().remove().end().text()
 		car.model = modelExtractor.extractModel(car.title, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
 		
-		car.title += ' ' + $(detailsBloc.get(6)).text()
+		car.title += ' ' + $('.desc').text()
 		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
 
 		// console.log('car', car)
-		if(car.imgUrl && car.imgUrl !== ''){
+		if(car.imgUrl && car.imgUrl !== '' && car.dateAdded){
 			cars.push(car)
 		}
 	}
@@ -137,8 +137,12 @@ function processPage(html){
 
 
 function extractDate(date){
-	var extracted_date = date.match(/(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/[0-9]{4}/g).join('')
-	return moment(extracted_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
+	var extracted_date = date.match(/(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/[0-9]{4}/g)
+	if(extracted_date){
+		extracted_date = extracted_date.join('')
+		return moment(extracted_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
+	}
+	return null 
 }
 
 module.exports = { reezocar, leparking, processPage }
