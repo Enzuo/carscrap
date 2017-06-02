@@ -114,7 +114,7 @@ function leparking(html){
 		// car.title += ' ' + $(detailsBloc.get(6)).children().remove().end().text()
 		car.model = modelExtractor.extractModel(car.title, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
 		
-		car.title += ' ' + $('.desc').text()
+		car.title += ' ' + carAd.find('.desc').text()
 		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
 
