@@ -48,7 +48,7 @@ db.init()
 			return extractor.processPage(html) 
 		})
 		.then((cars) => {
-			return Promise.all(cars.map(addImageHash))
+			return Promise.map(cars, addImageHash, {concurrency: 2})
 		})
 		.catch((err) => {
 			debug('got an error scrapping all cars', err)
