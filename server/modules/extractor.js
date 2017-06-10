@@ -26,7 +26,8 @@ function reezocar(html){
 		car.imgUrl = carAd.find('.picture img').attr('src')
 		/* TODO can crash moment */
 		car.year = moment($(carAd.find('.ad-details li').get(2)).children().remove().end().text()).format('YYYYMMDD')
-		car.mileage = $(carAd.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g).join('')
+		var mileage = $(carAd.find('.ad-details li').get(3)).children().remove().end().text().match(/\d/g)
+		car.mileage = mileage !== null ? mileage.join('') : 0
 		car.fuel = $(carAd.find('.ad-details li').get(4)).children().remove().end().text()
 		car.gearbox = $(carAd.find('.ad-details li').get(5)).children().remove().end().text()
 		car.location = carAd.find('.ad-picture li.loc').children().remove().end().text().trim()
@@ -46,7 +47,7 @@ function reezocar(html){
 		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
 		
 		// carsImagesPromises.push(addImageToData(imgUrl, car))
-		if(car.imgUrl && car.price){
+		if(car.imgUrl && car.price && car.year !== 'Invalid date'){
 			cars.push(car)
 		}
 	}
