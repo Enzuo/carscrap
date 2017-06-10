@@ -4,8 +4,12 @@ var svg = d3.select('#graph').append('svg')
 svg.attr('height','100%')
 .attr('width','100%')
 
-
-fetch('/cars')
+var params = { model: 'hyundai i20' }
+var urlParams = new URLSearchParams(Object.entries(params))
+if(urlParams !== '' && urlParams){
+	urlParams = '?' + urlParams
+}
+fetch('/cars' + urlParams)
 .then(function(response){
 	if(response.ok){
 		var contentType = response.headers.get('content-type');

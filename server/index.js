@@ -13,37 +13,20 @@ const _ = require("underscore")._
 
 const db = require('./modules/database')
 
-const normalScrap = require('./modules/normalScrap')
-const phantomScrap = require('./modules/phantomScrap')
+const scrapers = {
+	normalScrap : require('./modules/normalScrap'),
+	phantomScrap : require('./modules/phantomScrap'),
+}
 const extractor = require('./modules/extractor')
 
-var urls = [
-	{
-		url : 'http://www.reezocar.com/search/hyundai+i20.html?page=1&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
-		scraper : normalScrap,
-	},
-	{
-		url : 'http://www.reezocar.com/search/hyundai+i20.html?page=2&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
-		scraper : normalScrap,
-	},
-	{
-		url : 'http://www.reezocar.com/search/hyundai+i20.html?page=3&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on',
-		scraper : normalScrap,
-	},
-	{
-		// url : 'http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26slider_prix%3D1%7C12000%26slider_millesime%3D2015%7C2017',
-		// url : 'http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26id_finition%3D379%26slider_prix%3D1%7C12000%26slider_millesime%3D2015%7C2017',
-		url : 'http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26slider_prix%3D1%7C24000%26slider_km%3D1%7C100000%26slider_millesime%3D2015%7C2017',
-		scraper : phantomScrap,
-	}
-]
+var urls = config.get('urls')
 
 db.init()
 .then((db) => {
 	var carsPromises = []
 	for(var i=0; i < urls.length; i++){
 		var url = urls[i]
-		var p = getPage(url.url, url.scraper)
+		var p = getPage(url.url, scrapers[url.scraper])
 		.then((html) => {
 			return extractor.processPage(html) 
 		})
@@ -73,10 +56,10 @@ db.init()
 			}
 			debug('cars inserted', res)
 			debug('computing car flat...')
-			db.compute_cars((err, result)=>{
-				if(err) throw err
-				debug('car flat computed succesfully', result)
-			})
+			// db.compute_cars((err, result)=>{
+			// 	if(err) throw err
+			// 	debug('car flat computed succesfully', result)
+			// })
 		})
 	})
 })

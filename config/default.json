@@ -9,5 +9,19 @@
 		"download" : "data",
 		"images" : "images",
 		"pages" : "pages"
-	}
+	},
+	"urls": [
+		{
+			"url" : "http://www.reezocar.com/search/hyundai+i20.html?minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on",
+			"scraper" : "normalScrap"
+		},
+		{
+			"url" : "http://www.reezocar.com/search/hyundai+i20.html?page=2&minYear=2015&maxYear=2017&minMileage=0&maxMileage=250000%2B&minPrice=100&maxPrice=1000000%2B&energy=petrol&doors=4%2F5&cy=fr&body=hatchback%2Csaloon%2Csmall%2Cestate%2Cmpv%2Csuv%2Cconvertible%2Ccoupe%2Cclassic%2Ccommercial%2Cother&color_int=beige%2Cbrun%2Cgris%2Cnoir%2Cothers&int=al%2Cfl%2Cpl%2Ccl%2Cvl%2Cothers&dist=2000%2B&picture=on",
+			"scraper" : "normalScrap"
+		},
+		{
+			"url" : "http://www.leparking.fr/voiture-occasion/i20.html#!/voiture-occasion/i20.html%3Fid_pays%3D18%26id_energie%3D3%26slider_prix%3D1%7C24000%26slider_km%3D1%7C100000%26slider_millesime%3D2015%7C2017",
+			"scraper" : "phantomScrap"
+		}
+	]		
 }
