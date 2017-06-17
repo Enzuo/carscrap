@@ -46,7 +46,7 @@ function reezocar(html){
 		var model = modelExtractor.extractModel(modelTitle) || modelExtractor.extractModel(car.title)
 		if(model){
 			car.model = model.name[0]	
-			car.spec = modelExtractor.extractSpec(car.title, model.engines) + ' ' + modelExtractor.extractModel(car.title, model.finitions)
+			car.spec = modelExtractor.extractSpec(car.title, model.engines) + ' ' + modelExtractor.extractSpec(car.title, model.finitions)
 		}
 		
 		// carsImagesPromises.push(addImageToData(imgUrl, car))

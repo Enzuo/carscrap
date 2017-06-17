@@ -59,3 +59,13 @@ test('should extract the model then the specs', (assert) => {
 	assert.equal(engine, '1.0 tgdi 100', 'find the spec')
 	assert.end()
 })
+
+test.only('should extract the model then the specs', (assert) => {
+	var title = 'Hyundai I20 COUPE 1.4 100 INTUITIVE PLUS'
+	var model = modelExtractor.extractModel(title)
+	var engine = modelExtractor.extractSpec(title, model.engines)
+	var finitions = modelExtractor.extractSpec(title, model.finitions)
+	assert.equal(engine, '1.4 100', 'extract engine')
+	assert.equal(finitions, 'intuitive plus', 'extract finitions')
+	assert.end()
+})
