@@ -48,7 +48,6 @@ db.init()
 		var allCarScraps = prepareCarScrap(mergedCars, ['title','dateAdded','year','mileage','fuel','gearbox','location','departement','source','price','model','spec','imgPHash','imgName'])
 		
 		debug('got allCarScraps ready for insert')
-
 		db.car_scrap.insert(allCarScraps, (err, res) => {
 			if(err) {
 				debug(allCarScraps)
@@ -56,10 +55,10 @@ db.init()
 			}
 			debug('cars inserted', res)
 			debug('computing car flat...')
-			// db.compute_cars((err, result)=>{
-			// 	if(err) throw err
-			// 	debug('car flat computed succesfully', result)
-			// })
+			db.compute_cars((err, result)=>{
+				if(err) throw err
+				debug('car flat computed succesfully', result)
+			})
 		})
 	})
 })
