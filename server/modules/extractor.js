@@ -42,9 +42,12 @@ function reezocar(html){
 		if(price !== null){
 			car.price = price.join('')
 		}
-		var model = carAd.find('.ad-details .brand').children().remove().end().text() + carAd.find('.ad-details .model').children().remove().end().text()
-		car.model = modelExtractor.extractModel(model, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
-		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
+		var modelTitle = carAd.find('.ad-details .brand').children().remove().end().text() + carAd.find('.ad-details .model').children().remove().end().text()
+		var model = modelExtractor.extractModel(modelTitle) || modelExtractor.extractModel(car.title)
+		if(model){
+			car.model = model.name[0]	
+			car.spec = modelExtractor.extractSpec(car.title, model.engines) + ' ' + modelExtractor.extractModel(car.title, model.finitions)
+		}
 		
 		// carsImagesPromises.push(addImageToData(imgUrl, car))
 		if(car.imgUrl && car.price && car.year !== 'Invalid date'){
@@ -113,10 +116,13 @@ function leparking(html){
 		}
 
 		// car.title += ' ' + $(detailsBloc.get(6)).children().remove().end().text()
-		car.model = modelExtractor.extractModel(car.title, modelExtractor.models) || modelExtractor.extractModel(car.title, modelExtractor.models)
-		
+		var model = modelExtractor.extractModel(car.title)
 		car.title += ' ' + carAd.find('.desc').text()
-		car.spec = modelExtractor.extractModel(car.title, modelExtractor.engines) + ' ' + modelExtractor.extractModel(car.title, modelExtractor.finitions)
+		if(model){
+			car.model = model.name[0]
+			car.spec = modelExtractor.extractSpec(car.title, model.engines) + ' ' + modelExtractor.extractSpec(car.title, model.finitions)
+		}
+		
 		
 
 		// console.log('car', car)

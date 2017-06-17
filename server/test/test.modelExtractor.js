@@ -12,43 +12,50 @@ const engines = [
 ]
 
 test('extract first depth definition', (assert) => {
-	var engine = modelExtractor.extractModel('my car 1.2 cv84', engines)
+	var engine = modelExtractor.extractSpec('my car 1.2 cv84', engines)
 	assert.equal(engine, '1.2 84')
 	assert.end()
 })
 
 test('no matching defintion', (assert) => {
-	var engine = modelExtractor.extractModel('kangoo 1.3 super 100', engines)
+	var engine = modelExtractor.extractSpec('kangoo 1.3 super 100', engines)
 	assert.equal(engine, '')
 	assert.end()
 })
 
 test('deep definition', (assert) => {
-	var engine = modelExtractor.extractModel('my car with clim', engines)
+	var engine = modelExtractor.extractSpec('my car with clim', engines)
 	assert.equal(engine, '1.2 75')
 	assert.end()
 })
 
 test('only matching one parameter of an array definition', (assert) => {
-	var engine = modelExtractor.extractModel('my car 120', engines)
+	var engine = modelExtractor.extractSpec('my car 120', engines)
 	assert.equal(engine, '')
 	assert.end()
 })
 
 test('same definition depth first model is favorite', (assert) => {
-	var engine = modelExtractor.extractModel('my car 1.0 75', engines)
+	var engine = modelExtractor.extractSpec('my car 1.0 75', engines)
 	assert.equal(engine, '1.2 75')
 	assert.end()
 })
 
 test('can find model with deepest definition', (assert) => {
-	var engine = modelExtractor.extractModel('my car is a tgdi', engines)
-	assert.equal(engine, '1.0 tgdi 100', 'should find model with deepest definition')
+	var engine = modelExtractor.extractSpec('my car is a tgdi', engines)
+	assert.equal(engine, '1.0 tgdi 100', 'should find spec with deepest definition')
 	assert.end()
 })
 
 test('do not care about uppercases', (assert) => {
-	var engine = modelExtractor.extractModel('my car is a TgDI', engines)
-	assert.equal(engine, '1.0 tgdi 100', 'find the model even with uppercases')
+	var engine = modelExtractor.extractSpec('my car is a TgDI', engines)
+	assert.equal(engine, '1.0 tgdi 100', 'find the spec even with uppercases')
+	assert.end()
+})
+
+test('should extract the model then the specs', (assert) => {
+	var model = modelExtractor.extractModel('i20')
+	var engine = modelExtractor.extractSpec('tgdi', model.engines)
+	assert.equal(engine, '1.0 tgdi 100', 'find the spec')
 	assert.end()
 })
