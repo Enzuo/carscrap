@@ -21,3 +21,6 @@ it'll aggregate the info with previous scrap
 - Second
 
 `npm start` to launch the server and the visit `localhost:3000` to see the current state of the second hand market in a graph
+
+
+![screen](doc/screen.jpg)
